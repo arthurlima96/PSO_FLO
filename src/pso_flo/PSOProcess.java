@@ -8,26 +8,35 @@ package pso_flo;
 
 import java.util.List;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Random;
 
 public class PSOProcess implements PSOConstants {
+    
 	private List<Particle> swarm = new ArrayList<Particle>();
 	private double[] pBest = new double[SWARM_SIZE];
 	private List<Location> pBestLocation = new ArrayList<Location>();
 	private double gBest = 0;
 	private Location gBestLocation;
 	private double[] fitnessValueList = new double[SWARM_SIZE];
+        
+	private Map<Integer,Double> chaves = new HashMap<>();
+        
+	Random generator = new Random(); 
 	
-	Random generator = new Random();
-	
-	public void execute() {
+	public void execute(){
 		initializeSwarm();
-		updateFitnessList();
+		updateFitnessList(1);
 		
 		for(int i=0; i<SWARM_SIZE; i++){
 			pBest[i] = fitnessValueList[i];
-			pBestLocation.add(swarm.get(i).getLocation());
-		}               
+			pBestLocation.add(swarm.get(i).getLocation());   
+                        chaves.put(i, fitnessValueList[i]);
+		} 
+                
+                
+                /*
                 long inicio = System.currentTimeMillis();
                 
                 int ind =  PSOUtility.getMaxPos(fitnessValueList);
@@ -52,13 +61,13 @@ public class PSOProcess implements PSOConstants {
                         long fim = System.currentTimeMillis();
 		
                         System.out.println("Tempo foi de "+(fim-inicio)+" ms");
+                        */
                         
-                        
-                        inicio = System.currentTimeMillis();
+                long inicio = System.currentTimeMillis();
 		int t = 0;
 		double w;
 		while(t < MAX_ITERATION ) {
-			// step 1 - update pBest
+			// Atualizar Melhor Local
 			for(int i=0; i<SWARM_SIZE; i++) {
 				if(fitnessValueList[i] > pBest[i]) {
                                         //System.out.println("T = "+i+"["+fitnessValueList[i]+"] + ["+pBest[i]+"]");
@@ -67,15 +76,16 @@ public class PSOProcess implements PSOConstants {
 				}
 			}
 				
-			// step 2 - update gBest
+			// Atualizar Melhor Global
 			int bestParticleIndex = PSOUtility.getMaxPos(fitnessValueList);
 			if(fitnessValueList[bestParticleIndex] > gBest) {
 				gBest = fitnessValueList[bestParticleIndex];
 				gBestLocation = swarm.get(bestParticleIndex).getLocation();
 			}
 			
+                        //Descremento do W
 			w = W_UPPERBOUND - (((double) t) / MAX_ITERATION) * (W_UPPERBOUND - W_LOWERBOUND);
-			
+                        
 			for(int i=0; i<SWARM_SIZE; i++) {
 				double r1 = generator.nextDouble();
 				double r2 = generator.nextDouble();
@@ -133,7 +143,7 @@ public class PSOProcess implements PSOConstants {
 //			System.out.println("     Value: " + ProblemSet.evaluate(gBestLocation));
 			
 			t++;
-			updateFitnessList();
+			updateFitnessList(t);
 		}
 		
                 if(gBestLocation != null){
@@ -149,14 +159,14 @@ public class PSOProcess implements PSOConstants {
                     System.out.println("     Value: " + ProblemSet.evaluate(gBestLocation));
                 }
                 
-                fim = System.currentTimeMillis();
+                long fim = System.currentTimeMillis();
 		
                 System.out.println("Tempo foi de "+(fim-inicio)+" ms");
 	}
-	
+	//Inicialização do Enxame
 	public void initializeSwarm(){
 		Particle p;
-		for(int i=0; i<SWARM_SIZE; i++) {
+		for(int i=0; i<SWARM_SIZE; i++){
 			p = new Particle();
 			
 			// Cada par representa uma Dimensão e cada indice da dimensão é uma particula
@@ -195,10 +205,12 @@ public class PSOProcess implements PSOConstants {
 			swarm.add(p);
 		}
 	}
-	
-	public void updateFitnessList() {
+	//Fitness de cada Particula Inicialmente
+	public void updateFitnessList(int t) {
+                System.out.println("Iteração "+t);
 		for(int i=0; i<SWARM_SIZE; i++) {
-			fitnessValueList[i] = swarm.get(i).getFitnessValue();
+                            fitnessValueList[i] = swarm.get(i).getFitnessValue();
+                        System.out.println("Fitness: "+fitnessValueList[i]);
 		}
 	}
 
