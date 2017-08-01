@@ -22,7 +22,7 @@ public class PSOProcess implements PSOConstants {
 	private double[] fitnessValueList = new double[SWARM_SIZE];
         
 	private Map<Integer,Double> chaves = new HashMap<>();
-        
+    //
 	Random generator = new Random(); 
 	
 	public void execute(){
